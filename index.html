@@ -17,7 +17,6 @@
 </head>
 <body class="island-bg text-white min-h-screen">
   <div class="max-w-7xl mx-auto p-6">
-    <!-- Header -->
     <div class="flex justify-between items-center mb-8">
       <div class="flex items-center gap-4">
         <i class="fa-solid fa-leaf text-5xl text-emerald-400"></i>
@@ -27,7 +26,7 @@
         <button onclick="switchTab(0)" class="tab-btn px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-600">🏠 Dashboard</button>
         <button onclick="switchTab(1)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">📝 Log Game</button>
         <button onclick="switchTab(2)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">🛤️ Solo Campaign</button>
-        <button onclick="switchTab(3)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">👥 Duo Campaigns</button>
+        <button onclick="switchTab(3)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">👥 Multi-Spirit Campaigns</button>
         <button onclick="switchTab(4)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">📊 Stats</button>
         <button onclick="switchTab(5)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">⚙️ Settings</button>
       </div>
@@ -45,8 +44,8 @@
           <p id="solo-mastered" class="text-6xl font-bold text-emerald-400">0 / 12</p>
         </div>
         <div class="bg-white/10 rounded-2xl p-6 text-center">
-          <p class="text-amber-300 text-sm">DUO CAMPAIGNS</p>
-          <p id="duo-count" class="text-6xl font-bold text-amber-400">0</p>
+          <p class="text-amber-300 text-sm">MULTI-SPIRIT CAMPAIGNS</p>
+          <p id="multi-count" class="text-6xl font-bold text-amber-400">0</p>
         </div>
         <div class="bg-white/10 rounded-2xl p-6 text-center">
           <p class="text-sky-300 text-sm">WIN RATE</p>
@@ -60,7 +59,7 @@
       <h2 class="text-3xl mb-6">Log a Game</h2>
       <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 max-w-2xl mx-auto">
         <div class="space-y-6">
-          <input id="spirits-input" class="w-full bg-white/10 rounded-2xl p-4 text-lg" placeholder="Spirit(s) used (e.g. River Surges in Sunlight)">
+          <input id="spirits-input" class="w-full bg-white/10 rounded-2xl p-4 text-lg" placeholder="Spirit(s) used">
           <div class="grid grid-cols-2 gap-4">
             <select id="adversary-select" class="bg-white/10 rounded-2xl p-4"></select>
             <input id="level-input" type="number" min="0" max="7" value="0" class="bg-white/10 rounded-2xl p-4 text-center text-lg">
@@ -86,17 +85,17 @@
       <div id="solo-pathway" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
     </div>
 
-    <!-- DUO CAMPAIGNS -->
+    <!-- MULTI-SPIRIT CAMPAIGNS -->
     <div id="tab3" class="tab">
-      <h2 class="text-3xl mb-6">Duo Campaigns</h2>
-      <button onclick="startNewDuo()" class="mb-6 px-8 py-4 bg-amber-500 text-black font-bold rounded-3xl">+ Start New Duo Campaign</button>
-      <div id="duo-list" class="space-y-4"></div>
+      <h2 class="text-3xl mb-6">Multi-Spirit Campaigns</h2>
+      <button onclick="startNewMulti()" class="mb-6 px-8 py-4 bg-amber-500 text-black font-bold rounded-3xl">+ Start New Multi-Spirit Campaign</button>
+      <div id="multi-list" class="space-y-4"></div>
     </div>
 
     <!-- STATS -->
     <div id="tab4" class="tab">
       <h2 class="text-3xl mb-6">Statistics</h2>
-      <div id="stats-content" class="bg-white/10 rounded-3xl p-8"></div>
+      <div id="stats-content" class="bg-white/10 rounded-3xl p-8 text-lg"></div>
     </div>
 
     <!-- SETTINGS -->
@@ -107,8 +106,8 @@
         <div id="expansions-list" class="grid grid-cols-2 gap-4"></div>
         <div class="mt-8">
           <label class="flex items-center gap-3 text-lg">
-            <input type="checkbox" id="early-duo-unlock" onchange="toggleEarlyDuo()">
-            <span>Unlock Duo Campaigns early (veteran mode)</span>
+            <input type="checkbox" id="early-multi-unlock" onchange="toggleEarlyMulti()">
+            <span>Unlock Multi-Spirit Campaigns early (veteran mode)</span>
           </label>
         </div>
       </div>
@@ -116,15 +115,8 @@
   </div>
 
   <script>
-    // === DATA ===
-    const expansions = [
-      {id:"base", name:"Base Game"},
-      {id:"bc", name:"Branch & Claw"},
-      {id:"je", name:"Jagged Earth"},
-      {id:"ff", name:"Feather & Flame"},
-      {id:"ni", name:"Nature Incarnate"}
-    ];
-
+    // Data
+    const expansions = [{id:"base", name:"Base Game"}, {id:"bc", name:"Branch & Claw"}, {id:"je", name:"Jagged Earth"}, {id:"ff", name:"Feather & Flame"}, {id:"ni", name:"Nature Incarnate"}];
     const spirits = [
       {name:"Lightning's Swift Strike", exp:"base"},
       {name:"River Surges in Sunlight", exp:"base"},
@@ -142,15 +134,15 @@
 
     let games = JSON.parse(localStorage.getItem('si_games') || '[]');
     let soloProgress = JSON.parse(localStorage.getItem('si_solo_progress') || '{}');
-    let duos = JSON.parse(localStorage.getItem('si_duos') || '[]');
+    let multis = JSON.parse(localStorage.getItem('si_multis') || '[]');
     let ownedExp = JSON.parse(localStorage.getItem('si_owned') || JSON.stringify(expansions.map(e => e.id)));
-    let earlyDuo = JSON.parse(localStorage.getItem('si_early_duo') || 'false');
+    let earlyMulti = JSON.parse(localStorage.getItem('si_early_multi') || 'false');
 
     function switchTab(n) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab'+n).classList.add('active');
       if (n === 2) renderSoloPathway();
-      if (n === 3) renderDuoList();
+      if (n === 3) renderMultiList();
       if (n === 5) renderExpansions();
     }
 
@@ -159,11 +151,7 @@
       container.innerHTML = '';
       expansions.forEach(exp => {
         const checked = ownedExp.includes(exp.id) ? 'checked' : '';
-        container.innerHTML += `
-          <label class="flex items-center gap-3 bg-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/20">
-            <input type="checkbox" ${checked} onchange="toggleExpansion('${exp.id}')">
-            <span class="text-lg">${exp.name}</span>
-          </label>`;
+        container.innerHTML += `<label class="flex items-center gap-3 bg-white/10 rounded-2xl p-4 cursor-pointer"><input type="checkbox" ${checked} onchange="toggleExpansion('${exp.id}')"><span class="text-lg">${exp.name}</span></label>`;
       });
     }
 
@@ -173,9 +161,9 @@
       localStorage.setItem('si_owned', JSON.stringify(ownedExp));
     }
 
-    function toggleEarlyDuo() {
-      earlyDuo = !earlyDuo;
-      localStorage.setItem('si_early_duo', JSON.stringify(earlyDuo));
+    function toggleEarlyMulti() {
+      earlyMulti = !earlyMulti;
+      localStorage.setItem('si_early_multi', JSON.stringify(earlyMulti));
     }
 
     function renderSoloPathway() {
@@ -183,16 +171,33 @@
       container.innerHTML = '';
       spirits.forEach(spirit => {
         const completed = soloProgress[spirit.name] ? 'completed' : '';
-        container.innerHTML += `
-          <div onclick="viewSpirit('${spirit.name}')" class="spirit-card ${completed} bg-white/10 rounded-3xl p-6 cursor-pointer text-center">
-            <p class="font-bold text-lg">${spirit.name}</p>
-            <p class="text-xs text-emerald-300 mt-1">${spirit.exp.toUpperCase()}</p>
-          </div>`;
+        container.innerHTML += `<div onclick="viewSpirit('${spirit.name}')" class="spirit-card ${completed} bg-white/10 rounded-3xl p-6 cursor-pointer text-center"><p class="font-bold">${spirit.name}</p><p class="text-xs text-emerald-300">${spirit.exp}</p></div>`;
       });
     }
 
     function viewSpirit(name) {
-      alert(`Detailed progress for ${name} would appear here (next difficulty steps, win history, etc.).`);
+      alert(`Progress for ${name} — wins logged: ${soloProgress[name] || 0}. Next difficulty ramp coming soon.`);
+    }
+
+    function startNewMulti() {
+      if (!earlyMulti && multis.length === 0) {
+        alert("Complete Base + Branch & Claw solo campaigns at highest difficulty first (or enable veteran mode in Settings).");
+        return;
+      }
+      const name = prompt("Name your Multi-Spirit Campaign (e.g. River + Lightning + Earth):");
+      if (name) {
+        multis.push({name, games: []});
+        localStorage.setItem('si_multis', JSON.stringify(multis));
+        renderMultiList();
+      }
+    }
+
+    function renderMultiList() {
+      const container = document.getElementById('multi-list');
+      container.innerHTML = multis.length ? '' : '<p class="text-gray-400">No multi-spirit campaigns started yet.</p>';
+      multis.forEach(m => {
+        container.innerHTML += `<div class="bg-white/10 rounded-3xl p-6"><p class="font-bold">${m.name}</p></div>`;
+      });
     }
 
     function setResult(win) {
@@ -215,65 +220,33 @@
     }
 
     function saveGame() {
-      const spirits = document.getElementById('spirits-input').value || 'Unknown Spirit';
-      const adversary = document.getElementById('adversary-select').value || 'None';
-      const level = parseInt(document.getElementById('level-input').value) || 0;
-      const isWin = document.getElementById('win-btn').classList.contains('!bg-emerald-400');
-
-      const game = { date: new Date().toLocaleDateString(), spirits, adversary, level, result: isWin ? 'Win' : 'Loss' };
+      const spirits = document.getElementById('spirits-input').value || 'Unknown';
+      const game = {date: new Date().toLocaleDateString(), spirits, result: document.getElementById('win-btn').classList.contains('!bg-emerald-400') ? 'Win' : 'Loss'};
       games.push(game);
       localStorage.setItem('si_games', JSON.stringify(games));
-
-      if (isWin) {
+      if (game.result === 'Win') {
         soloProgress[spirits] = (soloProgress[spirits] || 0) + 1;
         localStorage.setItem('si_solo_progress', JSON.stringify(soloProgress));
       }
-
-      alert('✅ Game logged! Progress updated.');
+      alert('Game logged successfully!');
       switchTab(0);
       updateDashboard();
     }
 
-    function startNewDuo() {
-      if (!earlyDuo && duos.length === 0) {
-        alert("Complete Base + Branch & Claw solo campaigns at highest difficulty first (or enable veteran mode in Settings).");
-        return;
-      }
-      const name = prompt("Name your duo campaign (e.g. River + Lightning):");
-      if (name) {
-        duos.push({name, games: []});
-        localStorage.setItem('si_duos', JSON.stringify(duos));
-        renderDuoList();
-      }
-    }
-
-    function renderDuoList() {
-      const container = document.getElementById('duo-list');
-      container.innerHTML = duos.length ? '' : '<p class="text-gray-400">No duo campaigns started yet.</p>';
-      duos.forEach(duo => {
-        container.innerHTML += `<div class="bg-white/10 rounded-3xl p-6"><p class="font-bold">${duo.name}</p></div>`;
-      });
-    }
-
     function updateDashboard() {
       document.getElementById('solo-mastered').textContent = Object.keys(soloProgress).length + ' / ' + spirits.length;
-      document.getElementById('duo-count').textContent = duos.length;
-      const nextSpirit = spirits[Object.keys(soloProgress).length % spirits.length] || spirits[0];
-      document.getElementById('next-step').innerHTML = `
-        <p class="text-emerald-300">Next clear step:</p>
-        <p class="text-2xl font-bold">Play <span class="text-emerald-400">${nextSpirit.name}</span> at level ${Object.keys(soloProgress).length + 1}</p>
-      `;
+      document.getElementById('multi-count').textContent = multis.length;
+      const next = spirits[Object.keys(soloProgress).length % spirits.length] || spirits[0];
+      document.getElementById('next-step').innerHTML = `<p class="text-emerald-300">Next clear step:</p><p class="text-2xl font-bold">Play <span class="text-emerald-400">${next.name}</span></p>`;
     }
 
     function initApp() {
-      // Populate adversaries
       const advSelect = document.getElementById('adversary-select');
-      ["None", "Brandenburg-Prussia", "England", "Sweden", "France", "Habsburg Mining"].forEach(a => {
+      ["None", "Brandenburg-Prussia", "England", "Sweden", "France"].forEach(a => {
         const opt = document.createElement('option');
         opt.value = a; opt.textContent = a;
         advSelect.appendChild(opt);
       });
-
       updateDashboard();
       renderExpansions();
     }
