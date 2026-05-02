@@ -3,81 +3,303 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spirit Island Campaign</title>
+  <title>Spirit Island • Campaign</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { font-family: system-ui, sans-serif; }
+    .island-bg { background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
     .tab { display: none; }
     .tab.active { display: block; }
+    .spirit-card { transition: all 0.2s; }
+    .spirit-card.completed { background-color: #10b981; color: white; }
   </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen">
-  <div class="max-w-6xl mx-auto p-6">
+<body class="island-bg text-white min-h-screen">
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Header -->
     <div class="flex justify-between items-center mb-8">
-      <h1 class="text-4xl font-bold flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-400"></i> Spirit Island Campaign</h1>
-      <div class="flex gap-2">
-        <button onclick="switchTab(0)" class="px-6 py-3 rounded-xl hover:bg-white/10">🏠 Dashboard</button>
-        <button onclick="switchTab(1)" class="px-6 py-3 rounded-xl hover:bg-white/10">📝 Log Game</button>
-        <button onclick="switchTab(2)" class="px-6 py-3 rounded-xl hover:bg-white/10">🛤️ Solo Campaign</button>
-        <button onclick="switchTab(3)" class="px-6 py-3 rounded-xl hover:bg-white/10">⚙️ Settings</button>
+      <div class="flex items-center gap-4">
+        <i class="fa-solid fa-leaf text-5xl text-emerald-400"></i>
+        <h1 class="text-4xl font-bold">Spirit Island Campaign</h1>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="switchTab(0)" class="tab-btn px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-600">🏠 Dashboard</button>
+        <button onclick="switchTab(1)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">📝 Log Game</button>
+        <button onclick="switchTab(2)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">🛤️ Solo Campaign</button>
+        <button onclick="switchTab(3)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">👥 Duo Campaigns</button>
+        <button onclick="switchTab(4)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">📊 Stats</button>
+        <button onclick="switchTab(5)" class="tab-btn px-6 py-3 rounded-2xl hover:bg-white/10">⚙️ Settings</button>
       </div>
     </div>
 
-    <!-- Dashboard -->
+    <!-- DASHBOARD -->
     <div id="tab0" class="tab active">
-      <div id="next-step" class="bg-emerald-900/50 p-8 rounded-3xl text-xl mb-8"></div>
-      <p class="text-sm text-gray-400">Games logged: <span id="game-count">0</span></p>
+      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 mb-8">
+        <h2 class="text-3xl font-bold mb-4">Welcome back, Guardian</h2>
+        <div id="next-step" class="bg-emerald-900/70 rounded-2xl p-6 text-xl"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-6">
+        <div class="bg-white/10 rounded-2xl p-6 text-center">
+          <p class="text-emerald-300">Solo Spirits Mastered</p>
+          <p id="solo-mastered" class="text-6xl font-bold text-emerald-400">0/12</p>
+        </div>
+        <div class="bg-white/10 rounded-2xl p-6 text-center">
+          <p class="text-amber-300">Duo Campaigns</p>
+          <p id="duo-count" class="text-6xl font-bold text-amber-400">0</p>
+        </div>
+        <div class="bg-white/10 rounded-2xl p-6 text-center">
+          <p class="text-sky-300">Overall Win Rate</p>
+          <p id="win-rate" class="text-6xl font-bold text-sky-400">—</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Log Game -->
+    <!-- LOG GAME -->
     <div id="tab1" class="tab">
       <h2 class="text-3xl mb-6">Log a Game</h2>
-      <div class="space-y-6 max-w-md">
-        <input id="spirits" placeholder="Spirit(s) e.g. River Surges" class="w-full bg-white/10 p-4 rounded-2xl">
-        <input id="adversary" placeholder="Adversary" class="w-full bg-white/10 p-4 rounded-2xl">
-        <input id="level" type="number" value="0" class="w-full bg-white/10 p-4 rounded-2xl">
-        <button onclick="logGame()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-6 rounded-3xl text-xl">LOG GAME & CALCULATE SCORE</button>
+      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 max-w-2xl">
+        <div class="space-y-6">
+          <div>
+            <label class="block text-emerald-300 mb-2">Spirits Used</label>
+            <input id="spirits-input" class="w-full bg-white/10 rounded-2xl p-4" placeholder="e.g. River Surges in Sunlight">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-emerald-300 mb-2">Adversary</label>
+              <select id="adversary-select" class="w-full bg-white/10 rounded-2xl p-4"></select>
+            </div>
+            <div>
+              <label class="block text-emerald-300 mb-2">Level</label>
+              <input id="level-input" type="number" min="0" max="7" value="0" class="w-full bg-white/10 rounded-2xl p-4">
+            </div>
+          </div>
+          <div>
+            <label class="block text-emerald-300 mb-2">Scenario (optional)</label>
+            <input id="scenario-input" class="w-full bg-white/10 rounded-2xl p-4" placeholder="e.g. Blitz">
+          </div>
+          <div class="flex gap-4">
+            <button onclick="setResult(true)" id="win-btn" class="flex-1 py-6 text-2xl font-bold rounded-3xl bg-emerald-600">WIN</button>
+            <button onclick="setResult(false)" id="loss-btn" class="flex-1 py-6 text-2xl font-bold rounded-3xl bg-red-600">LOSS</button>
+          </div>
+          <!-- Score Calculator -->
+          <div class="bg-white/10 rounded-3xl p-6">
+            <h3 class="font-semibold mb-4">Score Calculator</h3>
+            <button onclick="calculateScore()" class="w-full bg-emerald-500 text-black py-4 rounded-2xl font-bold">Calculate Final Score</button>
+            <p id="score-result" class="mt-6 text-4xl font-bold text-center text-emerald-300"></p>
+          </div>
+          <button onclick="saveGame()" class="w-full py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-bold text-2xl rounded-3xl">LOG THIS GAME</button>
+        </div>
       </div>
     </div>
 
-    <!-- Solo Campaign -->
+    <!-- SOLO CAMPAIGN -->
     <div id="tab2" class="tab">
       <h2 class="text-3xl mb-6">Solo Campaign Pathway</h2>
-      <div id="pathway" class="space-y-4"></div>
+      <div id="solo-pathway" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
     </div>
 
-    <!-- Settings -->
+    <!-- DUO CAMPAIGNS -->
     <div id="tab3" class="tab">
+      <h2 class="text-3xl mb-6">Duo Campaigns</h2>
+      <button onclick="startNewDuo()" class="mb-6 px-8 py-4 bg-amber-500 text-black font-bold rounded-3xl">+ Start New Duo Campaign</button>
+      <div id="duo-list" class="space-y-4"></div>
+    </div>
+
+    <!-- STATS -->
+    <div id="tab4" class="tab">
+      <h2 class="text-3xl mb-6">Statistics</h2>
+      <p id="stats-text" class="text-lg">More stats will appear here after you log games.</p>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab5" class="tab">
       <h2 class="text-3xl mb-6">Settings</h2>
-      <p>Expansion toggles and advanced options coming in next update.</p>
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-emerald-300 mb-4">Owned Expansions</h3>
+          <div id="expansions-list" class="grid grid-cols-2 gap-4"></div>
+        </div>
+        <div>
+          <label class="flex items-center gap-3">
+            <input type="checkbox" id="early-duo-unlock" onchange="toggleEarlyDuo()">
+            <span class="text-lg">Unlock Duo Campaigns early (veteran mode)</span>
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    let games = JSON.parse(localStorage.getItem('si_games') || '[]');
+    // ==================== DATA ====================
+    const expansions = [
+      {id: "base", name: "Base Game"},
+      {id: "bc", name: "Branch & Claw"},
+      {id: "je", name: "Jagged Earth"},
+      {id: "ff", name: "Feather & Flame"},
+      {id: "ni", name: "Nature Incarnate"}
+    ];
 
+    const spirits = [
+      {id:1, name:"Lightning's Swift Strike", exp:"base", order:1},
+      {id:2, name:"River Surges in Sunlight", exp:"base", order:2},
+      {id:3, name:"Vital Strength of the Earth", exp:"base", order:3},
+      {id:4, name:"Shadows Flicker Like Flame", exp:"base", order:4},
+      {id:5, name:"A Spread of Rampant Green", exp:"base", order:5},
+      {id:6, name:"Thunderspeaker", exp:"bc", order:6},
+      {id:7, name:"Bringer of Dreams and Nightmares", exp:"bc", order:7},
+      // Add more as needed — this is the ordered solo path (easiest to hardest)
+    ];
+
+    let ownedExp = JSON.parse(localStorage.getItem('si_owned')) || expansions.map(e => e.id);
+    let games = JSON.parse(localStorage.getItem('si_games')) || [];
+    let soloProgress = JSON.parse(localStorage.getItem('si_solo_progress')) || {};
+    let duos = JSON.parse(localStorage.getItem('si_duos')) || [];
+    let earlyDuoUnlock = JSON.parse(localStorage.getItem('si_early_duo')) || false;
+
+    // ==================== CORE FUNCTIONS ====================
     function switchTab(n) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab' + n).classList.add('active');
+      document.getElementById('tab'+n).classList.add('active');
+      if (n === 2) renderSoloPathway();
+      if (n === 3) renderDuoList();
+      if (n === 5) renderExpansions();
+    }
+
+    function renderExpansions() {
+      const container = document.getElementById('expansions-list');
+      container.innerHTML = '';
+      expansions.forEach(exp => {
+        const checked = ownedExp.includes(exp.id) ? 'checked' : '';
+        container.innerHTML += `
+          <label class="flex items-center gap-3 bg-white/10 rounded-2xl p-4 cursor-pointer">
+            <input type="checkbox" ${checked} onchange="toggleExpansion('${exp.id}')">
+            <span>${exp.name}</span>
+          </label>`;
+      });
+    }
+
+    function toggleExpansion(id) {
+      if (ownedExp.includes(id)) {
+        ownedExp = ownedExp.filter(e => e !== id);
+      } else {
+        ownedExp.push(id);
+      }
+      localStorage.setItem('si_owned', JSON.stringify(ownedExp));
+    }
+
+    function toggleEarlyDuo() {
+      earlyDuoUnlock = !earlyDuoUnlock;
+      localStorage.setItem('si_early_duo', JSON.stringify(earlyDuoUnlock));
     }
 
     function logGame() {
-      const entry = {
+      const spirits = document.getElementById('spirits-input').value || 'Unknown';
+      const adversary = document.getElementById('adversary-select').value || 'None';
+      const level = parseInt(document.getElementById('level-input').value) || 0;
+      const isWin = document.getElementById('win-btn').classList.contains('!bg-emerald-400');
+
+      const game = {
         date: new Date().toLocaleDateString(),
-        spirits: document.getElementById('spirits').value || 'Unknown',
-        adversary: document.getElementById('adversary').value || 'None',
-        level: document.getElementById('level').value
+        spirits,
+        adversary,
+        level,
+        result: isWin ? 'Win' : 'Loss',
+        score: 0
       };
-      games.push(entry);
+
+      games.push(game);
       localStorage.setItem('si_games', JSON.stringify(games));
-      document.getElementById('game-count').textContent = games.length;
-      alert('Game logged successfully!');
+
+      // Update solo progress if win
+      if (isWin && spirits) {
+        soloProgress[spirits] = (soloProgress[spirits] || 0) + 1;
+        localStorage.setItem('si_solo_progress', JSON.stringify(soloProgress));
+      }
+
+      alert('Game logged! Your progress has been saved.');
+      switchTab(0);
     }
 
-    // Initial render
-    document.getElementById('game-count').textContent = games.length;
-    document.getElementById('next-step').innerHTML = `<p class="text-emerald-300">Next recommended: Play an easy spirit at low difficulty</p>`;
+    function setResult(win) {
+      const winBtn = document.getElementById('win-btn');
+      const lossBtn = document.getElementById('loss-btn');
+      if (win) {
+        winBtn.classList.add('!bg-emerald-400');
+        lossBtn.classList.remove('!bg-emerald-400');
+      } else {
+        lossBtn.classList.add('!bg-red-400');
+        winBtn.classList.remove('!bg-emerald-400');
+      }
+    }
+
+    function calculateScore() {
+      const level = parseInt(document.getElementById('level-input').value) || 0;
+      const isWin = document.getElementById('win-btn').classList.contains('!bg-emerald-400');
+      let score = isWin ? (level * 5 + 10) : (level * 2);
+      document.getElementById('score-result').innerHTML = `Final Score: <span class="text-5xl">${score}</span>`;
+    }
+
+    function renderSoloPathway() {
+      const container = document.getElementById('solo-pathway');
+      container.innerHTML = '';
+      spirits.forEach(spirit => {
+        const completed = soloProgress[spirit.name] ? 'completed' : '';
+        container.innerHTML += `
+          <div onclick="viewSpirit('${spirit.name}')" class="spirit-card ${completed} bg-white/10 rounded-3xl p-6 cursor-pointer">
+            <p class="font-bold">${spirit.name}</p>
+            <p class="text-sm text-emerald-300">${spirit.exp.toUpperCase()}</p>
+          </div>`;
+      });
+    }
+
+    function viewSpirit(name) {
+      alert(`You clicked ${name}. In the full version this would show detailed progress and next difficulty steps.`);
+    }
+
+    function startNewDuo() {
+      if (!earlyDuoUnlock && duos.length === 0) {
+        alert("You must complete Base + Branch & Claw solo campaigns at highest difficulty first (or enable veteran mode in Settings).");
+        return;
+      }
+      const name = prompt("Name your duo (e.g. River + Lightning):");
+      if (name) {
+        duos.push({name, progress: []});
+        localStorage.setItem('si_duos', JSON.stringify(duos));
+        renderDuoList();
+      }
+    }
+
+    function renderDuoList() {
+      const container = document.getElementById('duo-list');
+      container.innerHTML = duos.length ? '' : '<p class="text-gray-400">No duo campaigns started yet.</p>';
+      duos.forEach((duo, i) => {
+        container.innerHTML += `
+          <div class="bg-white/10 rounded-3xl p-6">
+            <p class="font-bold">${duo.name}</p>
+            <p class="text-sm text-amber-300">Self-contained campaign • ${duo.progress.length} games logged</p>
+          </div>`;
+      });
+    }
+
+    function init() {
+      // Populate adversary select
+      const advSelect = document.getElementById('adversary-select');
+      const adversaries = ["None", "Brandenburg-Prussia", "England", "Sweden", "France", "Habsburg Mining"];
+      adversaries.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        advSelect.appendChild(opt);
+      });
+
+      renderExpansions();
+      document.getElementById('solo-mastered').textContent = Object.keys(soloProgress).length + '/12';
+      document.getElementById('duo-count').textContent = duos.length;
+      document.getElementById('next-step').innerHTML = `<p class="text-emerald-300">Next recommended step: Play <span class="font-bold">${spirits[0].name}</span> at low difficulty</p>`;
+    }
+
+    window.onload = init;
   </script>
 </body>
 </html>
