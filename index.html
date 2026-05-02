@@ -10,43 +10,47 @@
     body { font-family: system-ui, sans-serif; }
     .tab { display: none; }
     .tab.active { display: block; }
-    .btn { transition: all 0.2s; }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen">
   <div class="max-w-6xl mx-auto p-6">
-    <h1 class="text-4xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-400"></i> Spirit Island Campaign</h1>
-
-    <div class="flex gap-2 border-b border-white/20 pb-2 mb-8">
-      <button onclick="switchTab(0)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">🏠 Dashboard</button>
-      <button onclick="switchTab(1)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">📝 Log Game</button>
-      <button onclick="switchTab(2)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">🛤️ Solo Campaign</button>
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-400"></i> Spirit Island Campaign</h1>
+      <div class="flex gap-2">
+        <button onclick="switchTab(0)" class="px-6 py-3 rounded-xl hover:bg-white/10">🏠 Dashboard</button>
+        <button onclick="switchTab(1)" class="px-6 py-3 rounded-xl hover:bg-white/10">📝 Log Game</button>
+        <button onclick="switchTab(2)" class="px-6 py-3 rounded-xl hover:bg-white/10">🛤️ Solo Campaign</button>
+        <button onclick="switchTab(3)" class="px-6 py-3 rounded-xl hover:bg-white/10">⚙️ Settings</button>
+      </div>
     </div>
 
     <!-- Dashboard -->
     <div id="tab0" class="tab active">
-      <h2 class="text-2xl mb-4">Welcome back</h2>
-      <p id="next-goal" class="bg-emerald-900/50 p-6 rounded-3xl text-lg">Your next recommended game will appear here after you log some games.</p>
-      <p class="mt-8 text-sm text-gray-400">Games logged: <span id="game-count">0</span></p>
+      <div id="next-step" class="bg-emerald-900/50 p-8 rounded-3xl text-xl mb-8"></div>
+      <p class="text-sm text-gray-400">Games logged: <span id="game-count">0</span></p>
     </div>
 
     <!-- Log Game -->
     <div id="tab1" class="tab">
-      <h2 class="text-2xl mb-6">Log a New Game</h2>
-      <div class="space-y-6">
-        <input id="spirit" placeholder="Spirit(s) used" class="w-full bg-white/10 p-4 rounded-2xl">
-        <div class="grid grid-cols-2 gap-4">
-          <input id="adversary" placeholder="Adversary" class="bg-white/10 p-4 rounded-2xl">
-          <input id="level" type="number" placeholder="Level" value="0" class="bg-white/10 p-4 rounded-2xl">
-        </div>
-        <button onclick="logGame()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-6 rounded-3xl text-xl">LOG GAME + CALCULATE SCORE</button>
+      <h2 class="text-3xl mb-6">Log a Game</h2>
+      <div class="space-y-6 max-w-md">
+        <input id="spirits" placeholder="Spirit(s) e.g. River Surges" class="w-full bg-white/10 p-4 rounded-2xl">
+        <input id="adversary" placeholder="Adversary" class="w-full bg-white/10 p-4 rounded-2xl">
+        <input id="level" type="number" value="0" class="w-full bg-white/10 p-4 rounded-2xl">
+        <button onclick="logGame()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-6 rounded-3xl text-xl">LOG GAME & CALCULATE SCORE</button>
       </div>
     </div>
 
     <!-- Solo Campaign -->
     <div id="tab2" class="tab">
-      <h2 class="text-2xl mb-6">Solo Campaign Pathway</h2>
-      <p id="campaign-status" class="text-lg">Progress will show here as you log wins.</p>
+      <h2 class="text-3xl mb-6">Solo Campaign Pathway</h2>
+      <div id="pathway" class="space-y-4"></div>
+    </div>
+
+    <!-- Settings -->
+    <div id="tab3" class="tab">
+      <h2 class="text-3xl mb-6">Settings</h2>
+      <p>Expansion toggles and advanced options coming in next update.</p>
     </div>
   </div>
 
@@ -55,21 +59,25 @@
 
     function switchTab(n) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab'+n).classList.add('active');
+      document.getElementById('tab' + n).classList.add('active');
     }
 
     function logGame() {
-      const spirit = document.getElementById('spirit').value || 'Unknown Spirit';
-      const entry = { date: new Date().toLocaleDateString(), spirit, result: 'Win' };
+      const entry = {
+        date: new Date().toLocaleDateString(),
+        spirits: document.getElementById('spirits').value || 'Unknown',
+        adversary: document.getElementById('adversary').value || 'None',
+        level: document.getElementById('level').value
+      };
       games.push(entry);
       localStorage.setItem('si_games', JSON.stringify(games));
-      alert('Game logged! Refresh to see updates.');
       document.getElementById('game-count').textContent = games.length;
+      alert('Game logged successfully!');
     }
 
-    // Init
+    // Initial render
     document.getElementById('game-count').textContent = games.length;
-    console.log('Spirit Island app ready - data saved in browser');
+    document.getElementById('next-step').innerHTML = `<p class="text-emerald-300">Next recommended: Play an easy spirit at low difficulty</p>`;
   </script>
 </body>
 </html>
