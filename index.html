@@ -6,33 +6,70 @@
   <title>Spirit Island Campaign</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style> body {font-family: system-ui;} .tab {display:none;} .tab.active {display:block;} </style>
+  <style>
+    body { font-family: system-ui, sans-serif; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .btn { transition: all 0.2s; }
+  </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen">
-  <div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-4xl font-bold mb-8 flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-400"></i> Spirit Island Campaign</h1>
-    
-    <div class="flex gap-2 mb-8 border-b border-white/20 pb-2">
-      <button onclick="switchTab(0)" class="tab-button px-6 py-3 rounded-t-xl border-b-4 border-transparent hover:border-emerald-400">Dashboard</button>
-      <button onclick="switchTab(1)" class="tab-button px-6 py-3 rounded-t-xl border-b-4 border-transparent hover:border-emerald-400">Log Game</button>
-      <button onclick="switchTab(2)" class="tab-button px-6 py-3 rounded-t-xl border-b-4 border-transparent hover:border-emerald-400">Solo Campaign</button>
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-4xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-leaf text-emerald-400"></i> Spirit Island Campaign</h1>
+
+    <div class="flex gap-2 border-b border-white/20 pb-2 mb-8">
+      <button onclick="switchTab(0)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">🏠 Dashboard</button>
+      <button onclick="switchTab(1)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">📝 Log Game</button>
+      <button onclick="switchTab(2)" class="tab-btn px-6 py-3 rounded-t-xl hover:bg-white/10 border-b-4 border-transparent hover:border-emerald-400">🛤️ Solo Campaign</button>
     </div>
 
-    <div id="tab0" class="tab active">Dashboard content - refresh to see saved games</div>
-    <div id="tab1" class="tab">Log Game form coming in next update</div>
-    <div id="tab2" class="tab">Solo Pathway - your progress will appear here</div>
+    <!-- Dashboard -->
+    <div id="tab0" class="tab active">
+      <h2 class="text-2xl mb-4">Welcome back</h2>
+      <p id="next-goal" class="bg-emerald-900/50 p-6 rounded-3xl text-lg">Your next recommended game will appear here after you log some games.</p>
+      <p class="mt-8 text-sm text-gray-400">Games logged: <span id="game-count">0</span></p>
+    </div>
+
+    <!-- Log Game -->
+    <div id="tab1" class="tab">
+      <h2 class="text-2xl mb-6">Log a New Game</h2>
+      <div class="space-y-6">
+        <input id="spirit" placeholder="Spirit(s) used" class="w-full bg-white/10 p-4 rounded-2xl">
+        <div class="grid grid-cols-2 gap-4">
+          <input id="adversary" placeholder="Adversary" class="bg-white/10 p-4 rounded-2xl">
+          <input id="level" type="number" placeholder="Level" value="0" class="bg-white/10 p-4 rounded-2xl">
+        </div>
+        <button onclick="logGame()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-6 rounded-3xl text-xl">LOG GAME + CALCULATE SCORE</button>
+      </div>
+    </div>
+
+    <!-- Solo Campaign -->
+    <div id="tab2" class="tab">
+      <h2 class="text-2xl mb-6">Solo Campaign Pathway</h2>
+      <p id="campaign-status" class="text-lg">Progress will show here as you log wins.</p>
+    </div>
   </div>
 
   <script>
+    let games = JSON.parse(localStorage.getItem('si_games') || '[]');
+
     function switchTab(n) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab'+n).classList.add('active');
     }
 
-    // Basic localStorage demo
-    let games = JSON.parse(localStorage.getItem('si_games') || '[]');
-    console.log('Saved games:', games);
-    alert('App loaded! Click tabs. Log a game to test saving.');
+    function logGame() {
+      const spirit = document.getElementById('spirit').value || 'Unknown Spirit';
+      const entry = { date: new Date().toLocaleDateString(), spirit, result: 'Win' };
+      games.push(entry);
+      localStorage.setItem('si_games', JSON.stringify(games));
+      alert('Game logged! Refresh to see updates.');
+      document.getElementById('game-count').textContent = games.length;
+    }
+
+    // Init
+    document.getElementById('game-count').textContent = games.length;
+    console.log('Spirit Island app ready - data saved in browser');
   </script>
 </body>
 </html>
